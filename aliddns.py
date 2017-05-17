@@ -3,16 +3,24 @@ import urllib2
 import json
 
 class DNS:
-    jsonfile = file('key.json')
+    jsonfile = file('/home/aliyun/key.json')
     s = json.load(jsonfile)
     aliyun.setDefaultAppInfo(str(s['id']),str(s['secret']))
     def getDNSIp(self):
-        b = aliyun.api.Dns20150109DescribeDomainRecordInfoRequest()
+        b = aliyun.api.Dns20150109DescribeDomainRecordInfoRequest(str(self.s['RecordId']))
         try:
             f = b.getResponse()
             return (str(f.get('Value')))
         except Exception,e:
             print('getDNSIp:',e)
+            return None
+    def addDNSIp(self,ip):
+        b = aliyun.api.Dns20150109AddDomainRecordRequest(ip)
+        try:
+            f = b.getResponse()
+            return (str(f.get('RecordId')))
+        except Exception,e:
+            print('addDNSIp:',e)
             return None
 
     def getMyIp(self):
@@ -23,8 +31,12 @@ class DNS:
             print('getMyIp:',e)
             return None;
 
+    def saveJson(self):
+        with open("key.json","w") as jsonfile:
+            json.dump(self.s, jsonfile)
+
     def main(self,newIp):
-        a = aliyun.api.Dns20150109UpdateDomainRecordRequest(newIp);
+        a = aliyun.api.Dns20150109UpdateDomainRecordRequest(newIp, self.s["RecordId"]);
         a.DBInstanceId = ""
         try:
             print("start")
@@ -36,8 +48,14 @@ class DNS:
 
 if __name__ =='__main__':
     d = DNS()
-    oldip = d.getDNSIp()
     newip = d.getMyIp()
+    if not d.s.get("RecordId"):
+        recordid = d.addDNSIp(newip)
+        if recordid:
+            d.s["RecordId"] = recordid
+            d.saveJson()
+
+    oldip = d.getDNSIp()
     if(oldip != newip and oldip is not None):
         print('oldIp:',oldip)
         print('newIp:',newip)

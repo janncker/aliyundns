@@ -3,12 +3,12 @@ Created by auto_sdk on 2015.09.21
 '''
 from aliyun.api.base import RestApi
 class Dns20150109UpdateDomainRecordRequest(RestApi):
-	def __init__(self,address,domain='dns.aliyuncs.com',port=80):
+	def __init__(self,address,recordid,domain='dns.aliyuncs.com',port=80):
 		RestApi.__init__(self,domain, port)
 		self.Line = "default"
 		self.Priority = None
-		self.RR = "home"
-		self.RecordId = "73609022"
+		self.RR = "@"
+		self.RecordId = recordid
 		self.TTL = None
 		self.Type = "A"
 		self.Value = address
